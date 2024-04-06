@@ -12,6 +12,15 @@ public class MovieRepositoryImpl implements MovieRepository {
         movieList = new ArrayList<>();
     }
 
+    public Movie findById(int id) {
+        for(Movie movie : movieList) {
+            if(movie.getId() == id) {
+                return movie;
+            }
+        }
+        return null;
+    }
+
     @Override
     public List<Movie> findAll() {
         return movieList;
@@ -19,22 +28,23 @@ public class MovieRepositoryImpl implements MovieRepository {
 
     @Override
     public void save(Movie movie) {
-        // TODO: implement save movie
+        if(findById(movie.getId()) != null) {
+            throw new RuntimeException("Duplicate id!");
+        }
+        movieList.add(movie);
     }
 
     @Override
     public void update(Movie movie) {
-        // TODO: implement update
-    }
 
-
-    public Movie findById(int id) {
-        // TODO: implement findById
-        return null;
     }
 
     @Override
     public void deleteById(int id) {
-        // TODO: implement deleteById
+        Movie movieToDelete = findById(id);
+
+        if(movieToDelete != null) {
+            this.movieList.remove(movieToDelete);
+        }
     }
 }
