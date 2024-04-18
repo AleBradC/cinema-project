@@ -244,7 +244,6 @@ public class AppConsole {
             }
         }
     }
-
     public void showReservationBetweenTime(int startHour, int endHour) {
         List<Reservation> reservations = reservationService.getAll();
         List<Reservation> matchingReservations = new ArrayList<>();
@@ -266,27 +265,27 @@ public class AppConsole {
             }
         }
     }
-
-    public void deleteReservationBetweenTime(int startHour, int endHour) {
+    public void deleteReservationBetweenDays(LocalDate startDate, LocalDate endDate) {
         List<Reservation> reservations = reservationService.getAll();
-        List<Reservation> matchingReservations = new ArrayList<>();
+        List<Reservation> reservationsToDelete = new ArrayList<>();
 
         for (Reservation reservation : reservations) {
-            LocalDateTime reservationTime = reservation.getDayAndTime();
-            int reservationHour = reservationTime.getHour();
-            if (reservationHour >= startHour && reservationHour <= endHour) {
-                matchingReservations.add(reservation);
+            LocalDate reservationDate = reservation.getDayAndTime().toLocalDate();
+            if (!reservationDate.isBefore(startDate) && !reservationDate.isAfter(endDate)) {
+                reservationsToDelete.add(reservation);
             }
         }
 
-        if (matchingReservations.isEmpty()) {
-            System.out.println("No reservations found within the specified hour interval.");
+        if (reservationsToDelete.isEmpty()) {
+            System.out.println("No reservations found within the specified day interval.");
         } else {
-            for (Reservation reservation : matchingReservations) {
-                reservations.remove(reservation);
+            for (Reservation reservation : reservationsToDelete) {
+                reservationService.deleteById(reservation.getId());
             }
+            System.out.println("Deleted all reservations within the specified day interval.");
         }
     }
+
     private void displayMenu() {
         printChar('-', 50);
         System.out.println("Welcome to the Cinema Management System!");
@@ -304,7 +303,7 @@ public class AppConsole {
         System.out.println("11. Update Reservation");
         System.out.println("12. Delete Reservation");
         System.out.println("13. Show Reservation between time");
-        System.out.println("14. Delete Reservation between time");
+        System.out.println("14. Delete Reservation between days");
         System.out.println("15. Show Cinema Details");
         System.out.print("Enter your choice: ");
     }
@@ -382,11 +381,16 @@ public class AppConsole {
                         showReservationBetweenTime(startHour, endHour);
                         break;
                     case 14:
-                        System.out.println("Enter start hour (0-23): ");
-                        int startDeleteHour = scanner.nextInt();
-                        System.out.println("Enter end hour (0-23): ");
-                        int endDeleteHour = scanner.nextInt();
-                        deleteReservationBetweenTime(startDeleteHour, endDeleteHour);
+                        System.out.println("Enter start date (yyyy-MM-dd): ");
+                        scanner.nextLine();
+                        String startDateInput = scanner.nextLine();
+                        LocalDate startDate = LocalDate.parse(startDateInput);
+
+                        System.out.println("Enter end date (yyyy-MM-dd): ");
+                        String endDateInput = scanner.nextLine();
+                        LocalDate endDate = LocalDate.parse(endDateInput);
+
+                        deleteReservationBetweenDays(startDate, endDate);
                         break;
                     case 15:
                         showCinemaDetails();

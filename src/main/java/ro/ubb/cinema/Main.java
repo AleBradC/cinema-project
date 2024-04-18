@@ -10,8 +10,6 @@ import ro.ubb.cinema.service.MovieService;
 import ro.ubb.cinema.service.ReservationService;
 import ro.ubb.cinema.ui.AppConsole;
 
-
-
 public class Main {
 
     public static void main(String[] args) {
