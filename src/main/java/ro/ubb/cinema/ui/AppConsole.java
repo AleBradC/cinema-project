@@ -284,6 +284,19 @@ public class AppConsole {
             System.out.println(clientCard);
         }
     }
+
+    public void loyaltyPointForBday(LocalDate startDate, LocalDate endDate, int incrementValue) {
+        List<ClientCard> clientCards = clientCardService.getAll();
+
+        for (ClientCard clientCard : clientCards) {
+            LocalDate birthDate = clientCard.getBirthDate();
+            if (birthDate != null && !birthDate.isBefore(startDate) && !birthDate.isAfter(endDate)) {
+                int updatedLoyaltyPoints = clientCard.getLoyaltyPoints() + incrementValue;
+                clientCard.setLoyaltyPoints(updatedLoyaltyPoints);
+                clientCardService.update(clientCard);
+            }
+        }
+    }
     private void displayMenu() {
         printChar('-', 50);
         System.out.println("Welcome to the Cinema Management System!");
@@ -304,6 +317,7 @@ public class AppConsole {
         System.out.println("14. Show Reservation between time");
         System.out.println("15. Delete Reservation between days");
         System.out.println("16. Show Cinema Details");
+        System.out.println("17. Add birth days points");
         System.out.print("Enter your choice: ");
     }
 
@@ -396,6 +410,15 @@ public class AppConsole {
                         break;
                     case 16:
                         showCinemaDetails();
+                        break;
+                    case 17:
+                        System.out.println("Enter start date (yyyy-MM-dd): ");
+                        LocalDate startBday = LocalDate.parse(scanner.next());
+                        System.out.println("Enter end date (yyyy-MM-dd): ");
+                        LocalDate endBday = LocalDate.parse(scanner.next());
+                        System.out.println("Enter increment value: ");
+                        int incrementValue = scanner.nextInt();
+                        loyaltyPointForBday(startBday, endBday, incrementValue);
                         break;
                     case 0:
                         System.out.println("Exiting...");
