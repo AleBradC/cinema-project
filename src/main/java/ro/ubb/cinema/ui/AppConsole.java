@@ -9,29 +9,25 @@ import ro.ubb.cinema.service.ReservationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class AppConsole {
-    private Scanner scanner = new Scanner(System.in);
-    private MovieService movieService;
-    private ClientCardService clientCardService;
-    private ReservationService reservationService;
+    private final Scanner scanner = new Scanner(System.in);
+    private final MovieService movieService;
+    private final ClientCardService clientCardService;
+    private final ReservationService reservationService;
 
     public AppConsole(MovieService movieService, ClientCardService clientCardService, ReservationService reservationService) {
         this.movieService = movieService;
         this.clientCardService = clientCardService;
         this.reservationService = reservationService;
     }
-
     private static void printChar(char c, int n) {
         for (int i = 0; i < n; i++) {
             System.out.print(c);
         }
         System.out.println();
     }
-
     private Movie getMovieDetails() {
         System.out.print("Enter Movie ID: ");
         int id = scanner.nextInt();
@@ -46,7 +42,6 @@ public class AppConsole {
 
         return new Movie(id, title, year, ticketPrice, inCinema);
     }
-
     public Movie getUpdatedMovieDetails(int id) {
         System.out.println("Enter new values for the movie (press enter to keep existing values): ");
         Movie currentMovie = movieService.getById(id);
@@ -70,7 +65,6 @@ public class AppConsole {
 
         return new Movie(currentMovie.getId(), title, year, ticketPrice, inCinema);
     }
-
     public ClientCard getCardDetails() {
         System.out.println("Enter Card ID: ");
         int id = scanner.nextInt();
@@ -89,7 +83,6 @@ public class AppConsole {
 
         return new ClientCard(id, firstName, lastName, cnp, birthDate, registeringDate, loyaltyPoints);
     }
-
     public ClientCard getUpdatedCardDetails(int id) {
         System.out.println("Enter new values for the card (press enter to keep existing values): ");
         ClientCard currentCard = clientCardService.getById(id);
@@ -122,7 +115,6 @@ public class AppConsole {
 
         return new ClientCard(currentCard.getId(), firstName, lastName, cnp, birthDate, registeringDate, loyaltyPoints);
     }
-
     public Reservation getReservationDetails() {
         Scanner scanner = new Scanner(System.in);
 
@@ -142,7 +134,6 @@ public class AppConsole {
 
         return new Reservation(id, filmId, clientCardId, dayAndTime);
     }
-
     public Reservation getUpdatedReservationDetails(int id) {
         Scanner scanner = new Scanner(System.in);
 
@@ -162,7 +153,6 @@ public class AppConsole {
 
         return new Reservation(currentReservation.getId(), filmId, clientCardId, dayAndTime);
     }
-
     private void showCinemaDetails() {
         printChar('-', 80);
         System.out.println("Movies are: ");
@@ -182,26 +172,6 @@ public class AppConsole {
         printChar('-', 80);
 
     }
-
-    private void displayMenu() {
-        printChar('-', 50);
-        System.out.println("Welcome to the Cinema Management System!");
-        System.out.println("0. Exit");
-        System.out.println("1. Add Movie");
-        System.out.println("2. Update Movie");
-        System.out.println("3. Delete Movie");
-        System.out.println("4. Add Client Card");
-        System.out.println("5. Update Client Card");
-        System.out.println("6. Delete Client Card");
-        System.out.println("7. Add Reservation");
-        System.out.println("8. Update Reservation");
-        System.out.println("9. Delete Reservation");
-        System.out.println("10. Search Movies");
-        System.out.println("11. Search Clients");
-        System.out.println("13. Show Cinema Details");
-        System.out.print("Enter your choice: ");
-    }
-
     public void searchMovies(String searchText) {
         List<Movie> movies = movieService.getAll();
         List<Movie> matchingMovies = new ArrayList<>();
@@ -217,11 +187,32 @@ public class AppConsole {
         } else {
             System.out.println("Matching movies:");
             for (Movie movie : matchingMovies) {
-                System.out.println(movie);
+                System.out.println(movie.toString());
             }
         }
     }
+    public void moviesOrderedByReservationCount() {
+        List<Movie> movies = movieService.getAll();
+        Map<Movie, Integer> movieReservationCounts = new HashMap<>();
 
+        for (Movie movie : movies) {
+            int reservationCount = 0;
+            for (Reservation reservation : reservationService.getAll()) {
+                if (reservation.getFilmId() == movie.getId()) {
+                    reservationCount++;
+                }
+            }
+            movieReservationCounts.put(movie, reservationCount);
+        }
+
+        List<Map.Entry<Movie, Integer>> sortedEntries = new ArrayList<>(movieReservationCounts.entrySet());
+        sortedEntries.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+
+        System.out.println("Movies ordered by reservation count (descending):");
+        for (Map.Entry<Movie, Integer> entry : sortedEntries) {
+            System.out.println(entry.getKey() + " - Reservations: " + entry.getValue());
+        }
+    }
     public void searchClients(String searchText) {
         List<ClientCard> clients = clientCardService.getAll();
         List<ClientCard> matchingClients = new ArrayList<>();
@@ -238,9 +229,96 @@ public class AppConsole {
         } else {
             System.out.println("Matching clients:");
             for (ClientCard client : matchingClients) {
-                System.out.println(client);
+                System.out.println(client.toString());
             }
         }
+    }
+    public void showReservationBetweenTime(int startHour, int endHour) {
+        List<Reservation> reservations = reservationService.getAll();
+        List<Reservation> matchingReservations = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            LocalDateTime reservationTime = reservation.getDayAndTime();
+            int reservationHour = reservationTime.getHour();
+            if (reservationHour >= startHour && reservationHour <= endHour) {
+                matchingReservations.add(reservation);
+            }
+        }
+
+        if (matchingReservations.isEmpty()) {
+            System.out.println("No reservations found within the specified hour interval.");
+        } else {
+            System.out.println("Reservations within the specified hour interval:");
+            for (Reservation reservation : matchingReservations) {
+                System.out.println(reservation.toString());
+            }
+        }
+    }
+    public void deleteReservationBetweenDays(LocalDate startDate, LocalDate endDate) {
+        List<Reservation> reservations = reservationService.getAll();
+        List<Reservation> reservationsToDelete = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            LocalDate reservationDate = reservation.getDayAndTime().toLocalDate();
+            if (!reservationDate.isBefore(startDate) && !reservationDate.isAfter(endDate)) {
+                reservationsToDelete.add(reservation);
+            }
+        }
+
+        if (reservationsToDelete.isEmpty()) {
+            System.out.println("No reservations found within the specified day interval.");
+        } else {
+            for (Reservation reservation : reservationsToDelete) {
+                reservationService.deleteById(reservation.getId());
+            }
+            System.out.println("Deleted all reservations within the specified day interval.");
+        }
+    }
+    private void showClientCardsOrderedByLoyaltyPoints() {
+        List<ClientCard> clientCards = new ArrayList<>(clientCardService.getAll());
+
+        clientCards.sort(Comparator.comparingInt(ClientCard::getLoyaltyPoints).reversed());
+
+        System.out.println("Client Cards ordered by loyalty points (descending):");
+        for (ClientCard clientCard : clientCards) {
+            System.out.println(clientCard);
+        }
+    }
+
+    public void loyaltyPointForBday(LocalDate startDate, LocalDate endDate, int incrementValue) {
+        List<ClientCard> clientCards = clientCardService.getAll();
+
+        for (ClientCard clientCard : clientCards) {
+            LocalDate birthDate = clientCard.getBirthDate();
+            if (birthDate != null && !birthDate.isBefore(startDate) && !birthDate.isAfter(endDate)) {
+                int updatedLoyaltyPoints = clientCard.getLoyaltyPoints() + incrementValue;
+                clientCard.setLoyaltyPoints(updatedLoyaltyPoints);
+                clientCardService.update(clientCard);
+            }
+        }
+    }
+    private void displayMenu() {
+        printChar('-', 50);
+        System.out.println("Welcome to the Cinema Management System!");
+        System.out.println("0. Exit");
+        System.out.println("1. Add Movie");
+        System.out.println("2. Update Movie");
+        System.out.println("3. Delete Movie");
+        System.out.println("4. Search Movies");
+        System.out.println("5. Display movies based on reservation (descending)");
+        System.out.println("6. Add Client Card");
+        System.out.println("7. Update Client Card");
+        System.out.println("8. Delete Client Card");
+        System.out.println("9. Search Clients");
+        System.out.println("10. Display cards based on loyalty points (descending)");
+        System.out.println("11. Add Reservation");
+        System.out.println("12. Update Reservation");
+        System.out.println("13. Delete Reservation");
+        System.out.println("14. Show Reservation between time");
+        System.out.println("15. Delete Reservation between days");
+        System.out.println("16. Show Cinema Details");
+        System.out.println("17. Add birth days points");
+        System.out.print("Enter your choice: ");
     }
 
     public void runConsole() {
@@ -251,14 +329,14 @@ public class AppConsole {
             movieService.add(new Movie(3, "Interstellar", 2014, 12, true));
 
             // Add Test Client Cards
-            clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now(), 1));
-            clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now(), 0));
+            clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now(), 0));
+            clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now(), 10));
             clientCardService.add(new ClientCard(3, "Alice", "Johnson", "1234567890345", LocalDate.of(1978, 3, 8), LocalDate.now(), 1));
 
             // Add Test Reservations
             reservationService.add(new Reservation(1, 1, 1, LocalDateTime.of(2024, 4, 10, 12, 30, 45)));
             reservationService.add(new Reservation(2, 2, 2, LocalDateTime.of(2024, 4, 11, 11, 55, 33)));
-            reservationService.add(new Reservation(3, 3, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
+            reservationService.add(new Reservation(3, 2, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
 
             while (true) {
                 displayMenu();
@@ -276,37 +354,71 @@ public class AppConsole {
                         movieService.deleteById(scanner.nextInt());
                         break;
                     case 4:
-                        clientCardService.add(getCardDetails());
-                        break;
-                    case 5:
-                        System.out.println("Enter Client Card ID: ");
-                        clientCardService.update(getUpdatedCardDetails(scanner.nextInt()));
-                        break;
-                    case 6:
-                        System.out.println("Enter Client Card ID: ");
-                        clientCardService.deleteById(scanner.nextInt());
-                        break;
-                    case 7:
-                        reservationService.add(getReservationDetails());
-                        break;
-                    case 8:
-                        System.out.println("Enter Reservation ID: ");
-                        reservationService.update(getUpdatedReservationDetails(scanner.nextInt()));
-                        break;
-                    case 9:
-                        System.out.println("Enter Reservation ID: ");
-                        reservationService.deleteById(scanner.nextInt());
-                        break;
-                    case 10:
                         System.out.println("Enter movie name: ");
                         searchMovies(scanner.next());
                         break;
-                    case 11:
+                    case 5:
+                        moviesOrderedByReservationCount();
+                        break;
+                    case 6:
+                        clientCardService.add(getCardDetails());
+                        break;
+                    case 7:
+                        System.out.println("Enter Client Card ID: ");
+                        clientCardService.update(getUpdatedCardDetails(scanner.nextInt()));
+                        break;
+                    case 8:
+                        System.out.println("Enter Client Card ID: ");
+                        clientCardService.deleteById(scanner.nextInt());
+                        break;
+                    case 9:
                         System.out.println("Enter client name: ");
                         searchClients(scanner.next());
                         break;
+                    case 10:
+                        showClientCardsOrderedByLoyaltyPoints();
+                        break;
+                    case 11:
+                        reservationService.add(getReservationDetails());
+                        break;
+                    case 12:
+                        System.out.println("Enter Reservation ID: ");
+                        reservationService.update(getUpdatedReservationDetails(scanner.nextInt()));
+                        break;
                     case 13:
+                        System.out.println("Enter Reservation ID: ");
+                        reservationService.deleteById(scanner.nextInt());
+                        break;
+                    case 14:
+                        System.out.println("Enter start hour (0-23): ");
+                        int startHour = scanner.nextInt();
+                        System.out.println("Enter end hour (0-23): ");
+                        int endHour = scanner.nextInt();
+                        showReservationBetweenTime(startHour, endHour);
+                        break;
+                    case 15:
+                        System.out.println("Enter start date (yyyy-MM-dd): ");
+                        scanner.nextLine();
+                        String startDateInput = scanner.nextLine();
+                        LocalDate startDate = LocalDate.parse(startDateInput);
+
+                        System.out.println("Enter end date (yyyy-MM-dd): ");
+                        String endDateInput = scanner.nextLine();
+                        LocalDate endDate = LocalDate.parse(endDateInput);
+
+                        deleteReservationBetweenDays(startDate, endDate);
+                        break;
+                    case 16:
                         showCinemaDetails();
+                        break;
+                    case 17:
+                        System.out.println("Enter start date (yyyy-MM-dd): ");
+                        LocalDate startBday = LocalDate.parse(scanner.next());
+                        System.out.println("Enter end date (yyyy-MM-dd): ");
+                        LocalDate endBday = LocalDate.parse(scanner.next());
+                        System.out.println("Enter increment value: ");
+                        int incrementValue = scanner.nextInt();
+                        loyaltyPointForBday(startBday, endBday, incrementValue);
                         break;
                     case 0:
                         System.out.println("Exiting...");
