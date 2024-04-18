@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AppConsole {
-    private Scanner scanner = new Scanner(System.in);
-    private MovieService movieService;
-    private ClientCardService clientCardService;
-    private ReservationService reservationService;
+    private final Scanner scanner = new Scanner(System.in);
+    private final MovieService movieService;
+    private final ClientCardService clientCardService;
+    private final ReservationService reservationService;
 
     public AppConsole(MovieService movieService, ClientCardService clientCardService, ReservationService reservationService) {
         this.movieService = movieService;
@@ -183,25 +183,6 @@ public class AppConsole {
 
     }
 
-    private void displayMenu() {
-        printChar('-', 50);
-        System.out.println("Welcome to the Cinema Management System!");
-        System.out.println("0. Exit");
-        System.out.println("1. Add Movie");
-        System.out.println("2. Update Movie");
-        System.out.println("3. Delete Movie");
-        System.out.println("4. Add Client Card");
-        System.out.println("5. Update Client Card");
-        System.out.println("6. Delete Client Card");
-        System.out.println("7. Add Reservation");
-        System.out.println("8. Update Reservation");
-        System.out.println("9. Delete Reservation");
-        System.out.println("10. Search Movies");
-        System.out.println("11. Search Clients");
-        System.out.println("13. Show Cinema Details");
-        System.out.print("Enter your choice: ");
-    }
-
     public void searchMovies(String searchText) {
         List<Movie> movies = movieService.getAll();
         List<Movie> matchingMovies = new ArrayList<>();
@@ -217,7 +198,7 @@ public class AppConsole {
         } else {
             System.out.println("Matching movies:");
             for (Movie movie : matchingMovies) {
-                System.out.println(movie);
+                System.out.println(movie.toString());
             }
         }
     }
@@ -238,9 +219,72 @@ public class AppConsole {
         } else {
             System.out.println("Matching clients:");
             for (ClientCard client : matchingClients) {
-                System.out.println(client);
+                System.out.println(client.toString());
             }
         }
+    }
+
+    public void showReservationBetweenTime(int startHour, int endHour) {
+        List<Reservation> reservations = reservationService.getAll();
+        List<Reservation> matchingReservations = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            LocalDateTime reservationTime = reservation.getDayAndTime();
+            int reservationHour = reservationTime.getHour();
+            if (reservationHour >= startHour && reservationHour <= endHour) {
+                matchingReservations.add(reservation);
+            }
+        }
+
+        if (matchingReservations.isEmpty()) {
+            System.out.println("No reservations found within the specified hour interval.");
+        } else {
+            System.out.println("Reservations within the specified hour interval:");
+            for (Reservation reservation : matchingReservations) {
+                System.out.println(reservation.toString());
+            }
+        }
+    }
+
+    public void deleteReservationBetweenTime(int startHour, int endHour) {
+        List<Reservation> reservations = reservationService.getAll();
+        List<Reservation> matchingReservations = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            LocalDateTime reservationTime = reservation.getDayAndTime();
+            int reservationHour = reservationTime.getHour();
+            if (reservationHour >= startHour && reservationHour <= endHour) {
+                matchingReservations.add(reservation);
+            }
+        }
+
+        if (matchingReservations.isEmpty()) {
+            System.out.println("No reservations found within the specified hour interval.");
+        } else {
+            for (Reservation reservation : matchingReservations) {
+                reservations.remove(reservation);
+            }
+        }
+    }
+    private void displayMenu() {
+        printChar('-', 50);
+        System.out.println("Welcome to the Cinema Management System!");
+        System.out.println("0. Exit");
+        System.out.println("1. Add Movie");
+        System.out.println("2. Update Movie");
+        System.out.println("3. Delete Movie");
+        System.out.println("4. Add Client Card");
+        System.out.println("5. Update Client Card");
+        System.out.println("6. Delete Client Card");
+        System.out.println("7. Add Reservation");
+        System.out.println("8. Update Reservation");
+        System.out.println("9. Delete Reservation");
+        System.out.println("10. Search Movies");
+        System.out.println("11. Search Clients");
+        System.out.println("13. Show Reservation between time");
+        System.out.println("14. Delete Reservation between time");
+        System.out.println("15. Show Cinema Details");
+        System.out.print("Enter your choice: ");
     }
 
     public void runConsole() {
@@ -306,6 +350,20 @@ public class AppConsole {
                         searchClients(scanner.next());
                         break;
                     case 13:
+                        System.out.println("Enter start hour (0-23): ");
+                        int startHour = scanner.nextInt();
+                        System.out.println("Enter end hour (0-23): ");
+                        int endHour = scanner.nextInt();
+                        showReservationBetweenTime(startHour, endHour);
+                        break;
+                    case 14:
+                        System.out.println("Enter start hour (0-23): ");
+                        int startDeleteHour = scanner.nextInt();
+                        System.out.println("Enter end hour (0-23): ");
+                        int endDeleteHour = scanner.nextInt();
+                        deleteReservationBetweenTime(startDeleteHour, endDeleteHour);
+                        break;
+                    case 15:
                         showCinemaDetails();
                         break;
                     case 0:

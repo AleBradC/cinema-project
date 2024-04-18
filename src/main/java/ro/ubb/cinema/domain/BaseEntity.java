@@ -3,8 +3,7 @@ package ro.ubb.cinema.domain;
 public abstract class BaseEntity {
     private int id;
 
-    public BaseEntity() {
-    }
+    public BaseEntity() {}
 
     public BaseEntity(int id) {
         this.id = id;
