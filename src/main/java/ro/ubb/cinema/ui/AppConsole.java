@@ -337,24 +337,22 @@ public class AppConsole {
     }
 
     public void runConsole() {
+        //Add Test Movies
+        movieService.add(new Movie(1, "Inception", 2010, 15, true));
+        movieService.add(new Movie(2, "The Dark Knight", 2008, 20, false));
+        movieService.add(new Movie(3, "Interstellar", 2014, 12, true));
+
+        // Add Test Client Cards
+        clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now(), 0));
+        clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now(), 10));
+        clientCardService.add(new ClientCard(3, "Alice", "Johnson", "1234567890345", LocalDate.of(1978, 3, 8), LocalDate.now(), 1));
+
+        // Add Test Reservations
+        reservationService.add(new Reservation(1, 1, 1, LocalDateTime.of(2024, 4, 10, 12, 30, 45)));
+        reservationService.add(new Reservation(2, 2, 2, LocalDateTime.of(2024, 4, 11, 11, 55, 33)));
+        reservationService.add(new Reservation(3, 2, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
         while (true) {
             try {
-                //Add Test Movies
-                movieService.add(new Movie(1, "Inception", 2010, 15, true));
-                movieService.add(new Movie(2, "The Dark Knight", 2008, 20, false));
-                movieService.add(new Movie(3, "Interstellar", 2014, 12, true));
-
-                // Add Test Client Cards
-                clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now(), 0));
-                clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now(), 10));
-                clientCardService.add(new ClientCard(3, "Alice", "Johnson", "1234567890345", LocalDate.of(1978, 3, 8), LocalDate.now(), 1));
-
-                // Add Test Reservations
-                reservationService.add(new Reservation(1, 1, 1, LocalDateTime.of(2024, 4, 10, 12, 30, 45)));
-                reservationService.add(new Reservation(2, 2, 2, LocalDateTime.of(2024, 4, 11, 11, 55, 33)));
-                reservationService.add(new Reservation(3, 2, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
-
-
                 displayMenu();
                 int choice = scanner.nextInt();
                 switch (choice) {
@@ -445,6 +443,8 @@ public class AppConsole {
 
             } catch (RuntimeException re) {
                 System.out.println("Error: " + re.getMessage());
+                re.printStackTrace();
+                System.exit(0);
             }
         }
     }
