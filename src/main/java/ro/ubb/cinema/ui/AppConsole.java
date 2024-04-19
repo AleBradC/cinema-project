@@ -22,12 +22,14 @@ public class AppConsole {
         this.clientCardService = clientCardService;
         this.reservationService = reservationService;
     }
+
     private static void printChar(char c, int n) {
         for (int i = 0; i < n; i++) {
             System.out.print(c);
         }
         System.out.println();
     }
+
     private Movie getMovieDetails() {
         System.out.print("Enter Movie ID: ");
         int id = scanner.nextInt();
@@ -42,6 +44,7 @@ public class AppConsole {
 
         return new Movie(id, title, year, ticketPrice, inCinema);
     }
+
     public Movie getUpdatedMovieDetails(int id) {
         System.out.println("Enter new values for the movie (press enter to keep existing values): ");
         Movie currentMovie = movieService.getById(id);
@@ -65,6 +68,7 @@ public class AppConsole {
 
         return new Movie(currentMovie.getId(), title, year, ticketPrice, inCinema);
     }
+
     public ClientCard getCardDetails() {
         System.out.println("Enter Card ID: ");
         int id = scanner.nextInt();
@@ -83,6 +87,7 @@ public class AppConsole {
 
         return new ClientCard(id, firstName, lastName, cnp, birthDate, registeringDate, loyaltyPoints);
     }
+
     public ClientCard getUpdatedCardDetails(int id) {
         System.out.println("Enter new values for the card (press enter to keep existing values): ");
         ClientCard currentCard = clientCardService.getById(id);
@@ -115,6 +120,7 @@ public class AppConsole {
 
         return new ClientCard(currentCard.getId(), firstName, lastName, cnp, birthDate, registeringDate, loyaltyPoints);
     }
+
     public Reservation getReservationDetails() {
         Scanner scanner = new Scanner(System.in);
 
@@ -134,6 +140,7 @@ public class AppConsole {
 
         return new Reservation(id, filmId, clientCardId, dayAndTime);
     }
+
     public Reservation getUpdatedReservationDetails(int id) {
         Scanner scanner = new Scanner(System.in);
 
@@ -153,6 +160,7 @@ public class AppConsole {
 
         return new Reservation(currentReservation.getId(), filmId, clientCardId, dayAndTime);
     }
+
     private void showCinemaDetails() {
         printChar('-', 80);
         System.out.println("Movies are: ");
@@ -172,6 +180,7 @@ public class AppConsole {
         printChar('-', 80);
 
     }
+
     public void searchMovies(String searchText) {
         List<Movie> movies = movieService.getAll();
         List<Movie> matchingMovies = new ArrayList<>();
@@ -191,6 +200,7 @@ public class AppConsole {
             }
         }
     }
+
     public void moviesOrderedByReservationCount() {
         List<Movie> movies = movieService.getAll();
         Map<Movie, Integer> movieReservationCounts = new HashMap<>();
@@ -213,6 +223,7 @@ public class AppConsole {
             System.out.println(entry.getKey() + " - Reservations: " + entry.getValue());
         }
     }
+
     public void searchClients(String searchText) {
         List<ClientCard> clients = clientCardService.getAll();
         List<ClientCard> matchingClients = new ArrayList<>();
@@ -233,6 +244,7 @@ public class AppConsole {
             }
         }
     }
+
     public void showReservationBetweenTime(int startHour, int endHour) {
         List<Reservation> reservations = reservationService.getAll();
         List<Reservation> matchingReservations = new ArrayList<>();
@@ -254,6 +266,7 @@ public class AppConsole {
             }
         }
     }
+
     public void deleteReservationBetweenDays(LocalDate startDate, LocalDate endDate) {
         List<Reservation> reservations = reservationService.getAll();
         List<Reservation> reservationsToDelete = new ArrayList<>();
@@ -274,6 +287,7 @@ public class AppConsole {
             System.out.println("Deleted all reservations within the specified day interval.");
         }
     }
+
     private void showClientCardsOrderedByLoyaltyPoints() {
         List<ClientCard> clientCards = new ArrayList<>(clientCardService.getAll());
 
@@ -297,6 +311,7 @@ public class AppConsole {
             }
         }
     }
+
     private void displayMenu() {
         printChar('-', 50);
         System.out.println("Welcome to the Cinema Management System!");
@@ -322,23 +337,22 @@ public class AppConsole {
     }
 
     public void runConsole() {
-        try {
-            //Add Test Movies
-            movieService.add(new Movie(1, "Inception", 2010, 15, true));
-            movieService.add(new Movie(2, "The Dark Knight", 2008, 20, false));
-            movieService.add(new Movie(3, "Interstellar", 2014, 12, true));
+        //Add Test Movies
+        movieService.add(new Movie(1, "Inception", 2010, 15, true));
+        movieService.add(new Movie(2, "The Dark Knight", 2008, 20, false));
+        movieService.add(new Movie(3, "Interstellar", 2014, 12, true));
 
-            // Add Test Client Cards
-            clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now(), 0));
-            clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now(), 10));
-            clientCardService.add(new ClientCard(3, "Alice", "Johnson", "1234567890345", LocalDate.of(1978, 3, 8), LocalDate.now(), 1));
+        // Add Test Client Cards
+        clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now(), 0));
+        clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now(), 10));
+        clientCardService.add(new ClientCard(3, "Alice", "Johnson", "1234567890345", LocalDate.of(1978, 3, 8), LocalDate.now(), 1));
 
-            // Add Test Reservations
-            reservationService.add(new Reservation(1, 1, 1, LocalDateTime.of(2024, 4, 10, 12, 30, 45)));
-            reservationService.add(new Reservation(2, 2, 2, LocalDateTime.of(2024, 4, 11, 11, 55, 33)));
-            reservationService.add(new Reservation(3, 2, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
-
-            while (true) {
+        // Add Test Reservations
+        reservationService.add(new Reservation(1, 1, 1, LocalDateTime.of(2024, 4, 10, 12, 30, 45)));
+        reservationService.add(new Reservation(2, 2, 2, LocalDateTime.of(2024, 4, 11, 11, 55, 33)));
+        reservationService.add(new Reservation(3, 2, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
+        while (true) {
+            try {
                 displayMenu();
                 int choice = scanner.nextInt();
                 switch (choice) {
@@ -426,9 +440,12 @@ public class AppConsole {
                     default:
                         System.out.println("Invalid choice. Please try again.");
                 }
+
+            } catch (RuntimeException re) {
+                System.out.println("Error: " + re.getMessage());
+                re.printStackTrace();
+                System.exit(0);
             }
-        } catch (RuntimeException re) {
-            System.out.println("Error: " + re.getMessage());
         }
     }
 }

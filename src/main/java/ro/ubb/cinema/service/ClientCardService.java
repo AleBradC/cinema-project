@@ -15,6 +15,11 @@ public class ClientCardService {
 
     public void add(ClientCard clientCard) {
         ClientCardValidator.validate(clientCard);
+        for (ClientCard card : clientCardRepository.findAll()) {
+            if (card.getCnp().matches(clientCard.getCnp())) {
+                throw new RuntimeException("CNP is already used!");
+            }
+        }
         clientCardRepository.save(clientCard);
     }
 

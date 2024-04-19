@@ -21,7 +21,7 @@ public class ClientCardValidator {
         }
 
         if (!validateCNP(clientCard.getCnp())) {
-            throw new RuntimeException("Invalid CNP format or CNP already exists.");
+            throw new RuntimeException("Invalid CNP format.");
         }
 
         LocalDate currentDate = LocalDate.now();
