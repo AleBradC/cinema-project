@@ -10,14 +10,13 @@ public class ClientCard extends BaseEntity {
     private LocalDate registeringDate;
     private int loyaltyPoints;
 
-    public ClientCard(int id, String firstName, String lastName, String cnp, LocalDate birthDate, LocalDate registeringDate, int loyaltyPoints) {
+    public ClientCard(int id, String firstName, String lastName, String cnp, LocalDate birthDate, LocalDate registeringDate) {
         super(id);
         this.firstName = firstName;
         this.lastName = lastName;
         this.cnp = cnp;
         this.birthDate = birthDate;
         this.registeringDate = registeringDate;
-        this.loyaltyPoints = loyaltyPoints;
     }
 
     public String getFirstName() {
@@ -70,8 +69,8 @@ public class ClientCard extends BaseEntity {
 
     @Override
     public String toString() {
-        return "ClientCard{" +
-                "firstName='" + firstName + '\'' +
+        return "ClientCard{" + "CardId: " + getId() +
+                ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", cnp=" + cnp +
                 ", birthDate=" + birthDate +
