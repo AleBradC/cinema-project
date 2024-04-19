@@ -82,10 +82,8 @@ public class AppConsole {
         LocalDate birthDate = LocalDate.parse(scanner.next());
         System.out.println("Enter Registering Date (yyyy-MM-dd): ");
         LocalDate registeringDate = LocalDate.parse(scanner.next());
-        System.out.println("Enter Loyalty Points: ");
-        int loyaltyPoints = scanner.nextInt();
 
-        return new ClientCard(id, firstName, lastName, cnp, birthDate, registeringDate, loyaltyPoints);
+        return new ClientCard(id, firstName, lastName, cnp, birthDate, registeringDate);
     }
 
     public ClientCard getUpdatedCardDetails(int id) {
@@ -114,11 +112,7 @@ public class AppConsole {
         String registeringDateInput = scanner.nextLine();
         LocalDate registeringDate = !registeringDateInput.isEmpty() ? LocalDate.parse(registeringDateInput) : currentCard.getRegisteringDate();
 
-        System.out.println("Loyalty Points: " + currentCard.getLoyaltyPoints() + " or: ");
-        String loyaltyPointsInput = scanner.nextLine();
-        int loyaltyPoints = !loyaltyPointsInput.isEmpty() ? Integer.parseInt(loyaltyPointsInput) : currentCard.getLoyaltyPoints();
-
-        return new ClientCard(currentCard.getId(), firstName, lastName, cnp, birthDate, registeringDate, loyaltyPoints);
+        return new ClientCard(currentCard.getId(), firstName, lastName, cnp, birthDate, registeringDate);
     }
 
     public Reservation getReservationDetails() {
@@ -159,6 +153,27 @@ public class AppConsole {
         scanner.close();
 
         return new Reservation(currentReservation.getId(), filmId, clientCardId, dayAndTime);
+    }
+
+    private void handleReservation(String action, Reservation reservation) {
+        Movie movie = movieService.getById(reservation.getFilmId());
+        ClientCard clientCard = clientCardService.getById(reservation.getClientCardId());
+
+        if (!movie.isInCinema()) {
+            throw new RuntimeException("Movie is not in cinema anymore!");
+        }
+
+        int pointsAcquired = (int) Math.round(movie.getTicketPrice() * 0.1);
+        int loyaltyPoints = clientCard.getLoyaltyPoints() + pointsAcquired;
+        clientCard.setLoyaltyPoints(loyaltyPoints);
+
+        if (action.equalsIgnoreCase("add")) {
+            reservationService.add(reservation);
+        } else if (action.equalsIgnoreCase("update")) {
+            reservationService.update(reservation);
+        } else {
+            throw new RuntimeException("Action not found!");
+        }
     }
 
     private void showCinemaDetails() {
@@ -339,18 +354,17 @@ public class AppConsole {
     public void runConsole() {
         //Add Test Movies
         movieService.add(new Movie(1, "Inception", 2010, 15, true));
-        movieService.add(new Movie(2, "The Dark Knight", 2008, 20, false));
+        movieService.add(new Movie(2, "The Dark Knight", 2008, 33, true));
         movieService.add(new Movie(3, "Interstellar", 2014, 12, true));
-
         // Add Test Client Cards
-        clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now(), 0));
-        clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now(), 10));
-        clientCardService.add(new ClientCard(3, "Alice", "Johnson", "1234567890345", LocalDate.of(1978, 3, 8), LocalDate.now(), 1));
-
+        clientCardService.add(new ClientCard(1, "John", "Doe", "1234567890123", LocalDate.of(1990, 5, 15), LocalDate.now()));
+        clientCardService.add(new ClientCard(2, "Jane", "Smith", "1234567890234", LocalDate.of(1985, 10, 25), LocalDate.now()));
+        clientCardService.add(new ClientCard(3, "Alice", "Johnson", "1234567890345", LocalDate.of(1978, 3, 8), LocalDate.now()));
         // Add Test Reservations
-        reservationService.add(new Reservation(1, 1, 1, LocalDateTime.of(2024, 4, 10, 12, 30, 45)));
-        reservationService.add(new Reservation(2, 2, 2, LocalDateTime.of(2024, 4, 11, 11, 55, 33)));
-        reservationService.add(new Reservation(3, 2, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
+        handleReservation("add", new Reservation(1, 1, 1, LocalDateTime.of(2024, 4, 10, 12, 30, 45)));
+        handleReservation("add", new Reservation(2, 2, 2, LocalDateTime.of(2024, 4, 11, 11, 55, 33)));
+        handleReservation("add", new Reservation(3, 3, 3, LocalDateTime.of(2024, 4, 12, 20, 45, 3)));
+
         while (true) {
             try {
                 displayMenu();
@@ -393,11 +407,11 @@ public class AppConsole {
                         showClientCardsOrderedByLoyaltyPoints();
                         break;
                     case 11:
-                        reservationService.add(getReservationDetails());
+                        handleReservation("add", getReservationDetails());
                         break;
                     case 12:
                         System.out.println("Enter Reservation ID: ");
-                        reservationService.update(getUpdatedReservationDetails(scanner.nextInt()));
+                        handleReservation("update", getUpdatedReservationDetails(scanner.nextInt()));
                         break;
                     case 13:
                         System.out.println("Enter Reservation ID: ");
